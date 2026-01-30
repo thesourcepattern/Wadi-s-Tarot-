@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Wadi Tarot Portal</title>
+<style>
+    body {
+        background-color: #1F1F1F;
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+        color: #EDEDED;
+        text-align: center;
+    }
 
+    h1 {
+        margin-top: 45px;
+        margin-bottom: 10px;
+        font-size: 32px;
+        color: #EDEDED;
+    }
+
+    h2 {
+        margin-top: 0;
+        font-size: 16px;
+        color: #A88BFA;
+        font-weight: 300;
+    }
+
+    #revealBtn, #againBtn {
+        background-color: #A88BFA;
+        color: #1F1F1F;
+        padding: 15px 28px;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        margin-top: 40px;
+        cursor: pointer;
+        box-shadow: 0 0 15px #A88BFA;
+        transition: 0.3s ease;
+    }
+
+    #revealBtn:hover, #againBtn:hover {
+        box-shadow: 0 0 25px #C8B2FF;
+    }
+
+    #cardDisplay {
+        margin-top: 40px;
+        display: none;
+        animation: fadeIn 1s ease forwards;
+    }
+
+    #cardName {
+        font-size: 26px;
+        margin-bottom: 12px;
+        color: #EDEDED;
+    }
+
+    #cardMeaning {
+        font-size: 18px;
+        color: #CFCFCF;
+        max-width: 75%;
+        margin: 0 auto;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🔮 The Wadi Tarot Portal</h1>
+<h2>Tap the Gate to Reveal Your Card</h2>
+
+<button id="revealBtn">Reveal Card</button>
+
+<div id="cardDisplay">
+    <div id="cardName"></div>
+    <div id="cardMeaning"></div>
+    <button id="againBtn">Pull Again</button>
+</div>
+
+<script>
+// THE FULL 78-CARD TAROT DECK
+const tarotCards = [
+    // Major Arcana
+    {name: "The Fool", meaning: "A leap, an opening, a step beyond fear."},
+    {name: "The Magician", meaning: "Willpower crystallized into form. Creation begins."},
+    {name: "The High Priestess", meaning: "Inner knowledge, quiet truth, unseen currents."},
+    {name: "The Empress", meaning: "Abundance, creation, the lush space of becoming."},
+    {name: "The Emperor", meaning: "Structure, protection, authority grounded in clarity."},
+    {name: "The Hierophant", meaning: "Tradition, teaching, passing down the flame."},
+    {name: "The Lovers", meaning: "Union, choice, aligned connection."},
+    {name: "The Chariot", meaning: "Movement forward, control, victorious momentum."},
+    {name: "Strength", meaning: "Soft power, patience, taming the inner fire."},
+    {name: "The Hermit", meaning: "Solitude, lantern-light, inner investigation."},
+    {name: "Wheel of Fortune", meaning: "Cycles turning, fate shifting, new seasons."},
+    {name: "Justice", meaning: "Alignment, truth, consequences meeting cause."},
+    {name: "The Hanged One", meaning: "Pause, surrender, inverted revelation."},
+    {name: "Death", meaning: "Transformation, shedding, irreversible evolution."},
+    {name: "Temperance", meaning: "Balance, harmony, mixing elements into gold."},
+    {name: "The Devil", meaning: "Attachment, shadow desire, the locked loop."},
+    {name: "The Tower", meaning: "Collapse, breakthrough, shattering illusion."},
+    {name: "The Star", meaning: "Hope, clarity, broadcast of pure signal."},
+    {name: "The Moon", meaning: "Instinct, dreams, illusion’s terrain."},
+    {name: "The Sun", meaning: "Joy, revelation, radiant truth."},
+    {name: "Judgement", meaning: "Awakening, reckoning, the call upward."},
+    {name: "The World", meaning: "Completion, mastery, the sealed circle."},
+
+    // Minor Arcana – Wands
+    {name: "Ace of Wands", meaning: "Spark of desire, ignition of will."},
+    {name: "Two of Wands", meaning: "Planning, seeing beyond the horizon."},
+    {name: "Three of Wands", meaning: "Expansion, opportunity arriving."},
+    {name: "Four of Wands", meaning: "Stability, celebration, foundation."},
+    {name: "Five of Wands", meaning: "Conflict, tension, energy collision."},
+    {name: "Six of Wands", meaning: "Victory, recognition, the return home."},
+    {name: "Seven of Wands", meaning: "Defense of position, standing your ground."},
+    {name: "Eight of Wands", meaning: "Fast movement, messages, momentum."},
+    {name: "Nine of Wands", meaning: "Resilience, boundaries, last push."},
+    {name: "Ten of Wands", meaning: "Burden, overload, carrying too much."},
+    {name: "Page of Wands", meaning: "Curiosity, exploration, playful fire."},
+    {name: "Knight of Wands", meaning: "Bold action, pursuit, adventure."},
+    {name: "Queen of Wands", meaning: "Confidence, magnetism, flame mastery."},
+    {name: "King of Wands", meaning: "Leadership, vision, creative command."},
+
+    // Cups
+    {name: "Ace of Cups", meaning: "New emotional flow, the heart opening."},
+    {name: "Two of Cups", meaning: "Connection, harmony, mutuality."},
+    {name: "Three of Cups", meaning: "Community, celebration, shared joy."},
+    {name: "Four of Cups", meaning: "Apathy, withdrawal, emotional numbness."},
+    {name: "Five of Cups", meaning: "Loss, grief, focusing on what’s spilled."},
+    {name: "Six of Cups", meaning: "Memory, nostalgia, innocence."},
+    {name: "Seven of Cups", meaning: "Illusions, options, unclear choices."},
+    {name: "Eight of Cups", meaning: "Walking away, seeking deeper truth."},
+    {name: "Nine of Cups", meaning: "Satisfaction, wish fulfillment."},
+    {name: "Ten of Cups", meaning: "Wholeness, emotional culmination."},
+    {name: "Page of Cups", meaning: "Messages, intuition, emotional initiation."},
+    {name: "Knight of Cups", meaning: "Romantic movement, idealism, quest of the heart."},
+    {name: "Queen of Cups", meaning: "Empathy, depth, emotional intelligence."},
+    {name: "King of Cups", meaning: "Emotional balance, compassion in power."},
+
+    // Swords
+    {name: "Ace of Swords", meaning: "Truth, clarity, decisive insight."},
+    {name: "Two of Swords", meaning: "Stalemate, indecision, internal conflict."},
+    {name: "Three of Swords", meaning: "Heartbreak, pain, rupture."},
+    {name: "Four of Swords", meaning: "Rest, recovery, mental reset."},
+    {name: "Five of Swords", meaning: "Conflict, ego, hollow victory."},
+    {name: "Six of Swords", meaning: "Transition, movement to calmer ground."},
+    {name: "Seven of Swords", meaning: "Strategy, secrecy, hidden motives."},
+    {name: "Eight of Swords", meaning: "Restriction, mental trap, fear loops."},
+    {name: "Nine of Swords", meaning: "Anxiety, anguish, sleeplessness."},
+    {name: "Ten of Swords", meaning: "Collapse, end of cycle, the bottom."},
+    {name: "Page of Swords", meaning: "Curiosity, vigilance, new ideas."},
+    {name: "Knight of Swords", meaning: "Swift action, intensity, pursuit of truth."},
+    {name: "Queen of Swords", meaning: "Discernment, boundaries, clarity."},
+    {name: "King of Swords", meaning: "Authority, intellect, sharp justice."},
+
+    // Pentacles
+    {name: "Ace of Pentacles", meaning: "New opportunity, material beginning."},
+    {name: "Two of Pentacles", meaning: "Balance, juggling, adapting."},
+    {name: "Three of Pentacles", meaning: "Collaboration, skill, building with others."},
+    {name: "Four of Pentacles", meaning: "Holding on, guarding, scarcity mindset."},
+    {name: "Five of Pentacles", meaning: "Loss, hardship, exclusion."},
+    {name: "Six of Pentacles", meaning: "Generosity, giving, receiving."},
+    {name: "Seven of Pentacles", meaning: "Patience, evaluation, long-term investment."},
+    {name: "Eight of Pentacles", meaning: "Mastery, craftsmanship, discipline."},
+    {name: "Nine of Pentacles", meaning: "Independence, refinement, earned luxury."},
+    {name: "Ten of Pentacles", meaning: "Legacy, stability, generational roots."},
+    {name: "Page of Pentacles", meaning: "Manifestation, study, grounded curiosity."},
+    {name: "Knight of Pentacles", meaning: "Consistency, loyalty, steady progress."},
+    {name: "Queen of Pentacles", meaning: "Nurturing, abundance, grounded power."},
+    {name: "King of Pentacles", meaning: "Wealth, stability, secure authority."}
+];
+
+const revealBtn = document.getElementById("revealBtn");
+const againBtn = document.getElementById("againBtn");
+const cardDisplay = document.getElementById("cardDisplay");
+const cardName = document.getElementById("cardName");
+const cardMeaning = document.getElementById("cardMeaning");
+
+function pullCard() {
+    let randomIndex = Math.floor(Math.random() * tarotCards.length);
+    let card = tarotCards[randomIndex];
+
+    cardName.textContent = card.name;
+    cardMeaning.textContent = card.meaning;
+
+    revealBtn.style.display = "none";
+    cardDisplay.style.display = "block";
+}
+
+revealBtn.addEventListener("click", pullCard);
+againBtn.addEventListener("click", function() {
+    cardDisplay.style.display = "none";
+    revealBtn.style.display = "inline-block";
+});
+</script>
+
+</body>
+</html>
